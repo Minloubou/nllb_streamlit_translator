@@ -8,7 +8,10 @@ Le projet s'inscrit dans un travail consacré aux langues à faibles ressources,
 - **Punu**
 - **Myènè**
 
-La version actuellement déployée utilise un modèle fine-tuné pour la traduction **Français ↔ Fang**.
+La version actuellement déployée utilise un modèle fine-tuné pour la traduction **Français ↔ Fang** ( Punu, Myene sont bientôt disponibles).
+## 🚀 Démo en ligne
+
+👉 [Tester le traducteur](https://nllbapptranslator-t8zmsstoscmtvjbreyngtt.streamlit.app)
 
 ## Fonctionnalités
 
