@@ -1,0 +1,40 @@
+app:
+  title: "🌍 Neural Machine Translator"
+  description: "A neural machine translation demo powered by a fine-tuned NLLB model."
+
+model:
+  # "local" = load a Hugging Face-format folder from this repository/computer.
+  # "huggingface" = download the model/tokenizer from a Hugging Face Hub repository.
+  source: "local"
+
+  # LOCAL example:
+  path_or_repo: "Minloubd/nllb-fang-fr-v5-600M-adafactor"
+
+  # HUGGING FACE HUB example:
+  # source: "huggingface"
+  # path_or_repo: "your-username/your-nllb-model"
+
+  quantize_int8: true
+  local_files_only: true
+  trust_remote_code: false
+
+generation:
+  max_input_length: 512
+  max_new_tokens: 256
+  num_beams: 4
+  length_penalty: 1.0
+  repetition_penalty: 1.0
+  early_stopping: true
+
+# IMPORTANT:
+# Replace these entries with the exact language tokens used by your tokenizer.
+# Standard NLLB examples:
+#   English -> eng_Latn
+#   French  -> fra_Latn
+#
+# If your fine-tuning introduced custom language tokens, put those exact tokens here.
+languages:
+  French: "fra_Latn"
+  Fang: "fang_Latn"
+  # Mooré: "YOUR_MOORE_LANGUAGE_TOKEN"
+  # Dioula: "YOUR_DIOULA_LANGUAGE_TOKEN"
