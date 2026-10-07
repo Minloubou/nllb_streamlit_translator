@@ -1,21 +1,30 @@
-# Neural Machine Translation App
+# 🌍 Traducteur automatique des langues gabonaises
 
-Interactive Streamlit deployment for a fine-tuned NLLB-style sequence-to-sequence
-translation model.
+Application interactive de traduction automatique développée avec **Streamlit** à partir d'un modèle **NLLB fine-tuné** pour la traduction entre le français et des langues africaines du Gabon.
 
-## Features
+Le projet s'inscrit dans un travail consacré aux langues à faibles ressources, notamment :
 
-- Hugging Face `AutoTokenizer` + `AutoModelForSeq2SeqLM`
-- Local model folder or Hugging Face Hub repository
-- CPU inference
-- Optional dynamic INT8 quantization of `torch.nn.Linear` layers
-- NLLB source/target language-token handling
-- YAML configuration
-- Streamlit model caching
-- Unit tests with `pytest`
-- Ready for Streamlit Community Cloud
+- **Fang**
+- **Punu**
+- **Myènè**
 
-## Project structure
+La version actuellement déployée utilise un modèle fine-tuné pour la traduction **Français ↔ Fang**.
+
+## Fonctionnalités
+
+- Modèle de traduction basé sur **NLLB**
+- Chargement avec Hugging Face `AutoTokenizer` et `AutoModelForSeq2SeqLM`
+- Prise en charge de modèles stockés localement ou sur **Hugging Face Hub**
+- Accès sécurisé aux modèles Hugging Face privés
+- Inférence sur CPU
+- Quantification dynamique INT8 optionnelle des couches `torch.nn.Linear`
+- Gestion des tokens de langue source et cible NLLB
+- Configuration centralisée avec un fichier YAML
+- Mise en cache du modèle avec Streamlit
+- Tests unitaires avec `pytest`
+- Application compatible avec **Streamlit Community Cloud**
+
+## Structure du projet
 
 ```text
 .
@@ -39,24 +48,24 @@ translation model.
 └── requirements-dev.txt
 ```
 
-## 1. Prepare your model
+## 1. Préparation du modèle
 
-Your model should be saved in Hugging Face format.
+Le modèle et le tokenizer doivent être sauvegardés au format Hugging Face.
 
-Example:
+Exemple :
 
 ```python
 model.save_pretrained("models/translation_model")
 tokenizer.save_pretrained("models/translation_model")
 ```
 
-For local execution, copy that folder into:
+Pour une utilisation entièrement locale, placez ensuite les fichiers dans :
 
 ```text
 models/translation_model/
 ```
 
-Then keep:
+et configurez `configs/config.yaml` ainsi :
 
 ```yaml
 model:
@@ -66,80 +75,157 @@ model:
   local_files_only: true
 ```
 
-## 2. Configure languages
+Dans le cadre du déploiement de cette application, le modèle est hébergé séparément sur **Hugging Face Hub** afin d'éviter de stocker plusieurs gigaoctets de poids directement dans le dépôt GitHub.
 
-Edit `configs/config.yaml`.
+## 2. Configuration du modèle Hugging Face
 
-For standard NLLB languages:
+Le modèle Fang actuellement utilisé est hébergé dans le dépôt :
+
+```text
+Minloubd/nllb-fang-fr-v5-600M-adafactor
+```
+
+La configuration correspondante dans `configs/config.yaml` est :
+
+```yaml
+model:
+  source: "huggingface"
+  path_or_repo: "Minloubd/nllb-fang-fr-v5-600M-adafactor"
+  quantize_int8: true
+  local_files_only: false
+  trust_remote_code: false
+```
+
+Le dépôt Hugging Face contenant le modèle étant privé, l'accès s'effectue avec un **token Hugging Face en lecture seule**.
+
+Ce token ne doit jamais être ajouté directement dans le code ou dans le dépôt GitHub.
+
+Pour une utilisation locale, créez :
+
+```text
+.streamlit/secrets.toml
+```
+
+avec :
+
+```toml
+HF_TOKEN = "hf_xxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+Le fichier `secrets.toml` est exclu du suivi Git grâce au `.gitignore`.
+
+Pour Streamlit Community Cloud, le même token doit être ajouté dans les **Secrets** de l'application.
+
+## 3. Configuration des langues
+
+Les langues sont définies dans :
+
+```text
+configs/config.yaml
+```
+
+Pour le modèle Français ↔ Fang actuellement utilisé :
 
 ```yaml
 languages:
-  French: "fra_Latn"
-  English: "eng_Latn"
+  Français: "fra_Latn"
+  Fang: "fang_Latn"
 ```
 
-For your fine-tuned low-resource languages, use the EXACT language tokens expected
-by your tokenizer.
+`fra_Latn` correspond au token NLLB du français.
 
-## 3. Install
+`fang_Latn` correspond au token utilisé pour le Fang lors du fine-tuning.
 
-Python 3.12 is a practical deployment target for Streamlit Community Cloud.
+Les versions destinées au **Punu** et au **Myènè** devront utiliser les tokens exacts définis lors de leur entraînement respectif.
+
+## 4. Installation
+
+Il est recommandé d'utiliser un environnement Python dédié au projet.
+
+Avec Conda :
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
+conda create -n fang_translator python=3.11 -y
+conda activate fang_translator
 ```
 
-On Windows:
+Puis :
 
 ```bash
-.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
 ```
 
-## 4. Run locally
+Sur certaines configurations macOS utilisant PyTorch 2.2.2, NumPy doit rester en version 1.x. Le projet utilise donc :
 
-From the repository root:
+```text
+numpy==1.26.4
+```
+
+## 5. Lancement local
+
+Depuis la racine du projet :
 
 ```bash
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
-## 5. Run tests
+L'application est ensuite accessible, par défaut, à l'adresse :
+
+```text
+http://localhost:8501
+```
+
+## 6. Exécution des tests
+
+Les tests unitaires peuvent être lancés avec :
 
 ```bash
 pytest -q
 ```
 
-## 6. Deploy without committing the large model to GitHub
+Ils vérifient notamment :
 
-For a ~600M/660M model, the recommended deployment layout is:
+- le chargement de la configuration ;
+- le fonctionnement du module de quantification ;
+- le pipeline d'inférence du traducteur.
+
+## 7. Déploiement sans stocker le modèle sur GitHub
+
+Un modèle NLLB d'environ **600M/660M paramètres** est trop volumineux pour être versionné directement dans un dépôt Git standard.
+
+L'architecture retenue est donc :
 
 ```text
-GitHub repository -> Streamlit Community Cloud
-                         |
-                         v
-                  Hugging Face model repo
+GitHub
+  |
+  | code source
+  v
+Streamlit Community Cloud
+  |
+  | authentification avec HF_TOKEN
+  v
+Hugging Face Hub privé
+  |
+  v
+Modèle NLLB fine-tuné + tokenizer
 ```
 
-Upload your model/tokenizer to a Hugging Face model repository, then change:
+Le dépôt GitHub contient ainsi uniquement :
 
-```yaml
-model:
-  source: "huggingface"
-  path_or_repo: "YOUR_USERNAME/YOUR_MODEL_REPOSITORY"
-  quantize_int8: true
-  local_files_only: false
-```
+- le code source ;
+- les fichiers de configuration ;
+- les tests ;
+- la documentation ;
+- les dépendances nécessaires au déploiement.
 
-If the Hugging Face repository is public, no token is required.
+Les poids du modèle restent hébergés sur Hugging Face.
 
-If the repository is private, authentication must be added through Streamlit
-Secrets rather than hardcoding a token in the repository.
+## 8. Quantification INT8
 
-## 7. INT8 quantization
+Afin de réduire l'utilisation mémoire lors de l'inférence CPU, le projet permet d'appliquer une quantification dynamique INT8 aux couches linéaires du modèle.
 
-The project uses PyTorch dynamic quantization:
+Exemple :
 
 ```python
 quantize_dynamic(
@@ -149,17 +235,24 @@ quantize_dynamic(
 )
 ```
 
-This is a CPU-oriented optimization. The original floating-point model is loaded
-first and then transformed in memory. Therefore, peak startup memory can still be
-higher than the final quantized model size.
+La quantification est principalement destinée à l'inférence sur CPU.
 
-Always compare translation quality before and after quantization.
+Le modèle original est d'abord chargé en mémoire en virgule flottante avant d'être quantifié. Le pic de consommation mémoire au démarrage peut donc être supérieur à la taille finale du modèle quantifié.
 
-## Important deployment note
+Les performances de traduction doivent toujours être comparées avant et après quantification afin de vérifier qu'aucune dégradation importante de qualité n'est introduite.
 
-A 600M/660M sequence-to-sequence model is large for a free CPU hosting service.
-Whether it fits depends on the memory available to the Streamlit instance and the
-exact checkpoint format. If the application exceeds the platform's memory limit,
-the next optimization step should be benchmarked rather than guessed (for example,
-a smaller/distilled checkpoint, ONNX Runtime quantization, or another inference
-backend).
+## 9. Objectif du projet
+
+L'objectif est de développer des outils de traduction neuronale pour des **langues africaines à faibles ressources**, en particulier des langues gabonaises encore peu représentées dans les grands corpus et modèles multilingues.
+
+Le projet combine :
+
+- constitution et préparation de corpus ;
+- fine-tuning de modèles de traduction multilingues ;
+- traitement de langues à faibles ressources ;
+- évaluation de modèles de Machine Translation ;
+- optimisation de l'inférence ;
+- développement d'une application interactive ;
+- déploiement d'un modèle NLP.
+
+Les travaux portent actuellement sur le **Fang**, avec une extension prévue ou développée vers le **Punu** et le **Myènè**.

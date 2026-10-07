@@ -1,21 +1,21 @@
 app:
-  title: "🌍 Neural Machine Translator"
-  description: "A neural machine translation demo powered by a fine-tuned NLLB model."
+  title: "🌍 Traducteur automatique des langues gabonaises"
+  description: "Application de traduction automatique basée sur un modèle NLLB fine-tuné pour des langues africaines du Gabon, notamment le Fang, le Punu et le Myènè."
 
 model:
-  # "local" = load a Hugging Face-format folder from this repository/computer.
-  # "huggingface" = download the model/tokenizer from a Hugging Face Hub repository.
-  source: "local"
+  # "local" : charge le modèle et le tokenizer depuis un dossier local.
+  # "huggingface" : charge le modèle et le tokenizer depuis Hugging Face Hub.
+  source: "huggingface"
 
-  # LOCAL example:
+  # Dépôt Hugging Face contenant le modèle fine-tuné.
   path_or_repo: "Minloubd/nllb-fang-fr-v5-600M-adafactor"
 
-  # HUGGING FACE HUB example:
-  # source: "huggingface"
-  # path_or_repo: "your-username/your-nllb-model"
-
+  # Quantification dynamique INT8 pour réduire l'utilisation mémoire sur CPU.
   quantize_int8: true
-  local_files_only: true
+
+  # False car le modèle est téléchargé depuis Hugging Face Hub.
+  local_files_only: false
+
   trust_remote_code: false
 
 generation:
@@ -26,15 +26,21 @@ generation:
   repetition_penalty: 1.0
   early_stopping: true
 
-# IMPORTANT:
-# Replace these entries with the exact language tokens used by your tokenizer.
-# Standard NLLB examples:
-#   English -> eng_Latn
-#   French  -> fra_Latn
+# Langues prises en charge.
 #
-# If your fine-tuning introduced custom language tokens, put those exact tokens here.
+# IMPORTANT :
+# Les identifiants doivent correspondre exactement aux tokens
+# utilisés par le tokenizer pendant le fine-tuning.
+#
+# Exemple NLLB standard :
+#   Français -> fra_Latn
+#
+# Fang est ici associé au token personnalisé utilisé lors du fine-tuning.
+# Remplacer les valeurs Punu et Myènè par les tokens exacts
+# utilisés dans leurs modèles/tokenizers respectifs.
+
 languages:
-  French: "fra_Latn"
+  Français: "fra_Latn"
   Fang: "fang_Latn"
-  # Mooré: "YOUR_MOORE_LANGUAGE_TOKEN"
-  # Dioula: "YOUR_DIOULA_LANGUAGE_TOKEN"
+  Punu: "puu_Latn"
+  Myènè: "mye_Latn"
