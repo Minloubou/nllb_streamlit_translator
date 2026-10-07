@@ -21,7 +21,6 @@ def _resolve_model_reference(
     path_or_repo = model_config["path_or_repo"]
 
     if source == "local":
-
         model_path = Path(path_or_repo)
 
         if not model_path.exists():
@@ -67,7 +66,6 @@ def load_translation_components(
     token = None
 
     if source == "huggingface":
-
         token = _get_huggingface_token()
 
         if token is None:
@@ -79,9 +77,7 @@ def load_translation_components(
     tokenizer = AutoTokenizer.from_pretrained(
         model_reference,
         token=token,
-        local_files_only=(
-            source == "local"
-        ),
+        local_files_only=(source == "local"),
         trust_remote_code=bool(
             model_config.get(
                 "trust_remote_code",
@@ -93,18 +89,16 @@ def load_translation_components(
     model = AutoModelForSeq2SeqLM.from_pretrained(
         model_reference,
         token=token,
-        local_files_only=(
-            source == "local"
-        ),
+        local_files_only=(source == "local"),
         trust_remote_code=bool(
             model_config.get(
                 "trust_remote_code",
                 False,
             )
         ),
+        low_cpu_mem_usage=True,
     )
 
-    model.to("cpu")
     model.eval()
 
     if bool(
